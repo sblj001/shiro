@@ -5,8 +5,18 @@
             http://www.springframework.org/schema/beans/spring-beans.xsd">
     <!-- 1、Shiro整合处理的时候，Realm是整合业务层（RPC端）的核心处理综合点 -->
     <bean id="memberReam" class="com.yootk.ssm.realm.MemberRealm">
+        <property name="cachingEnabled" value="true"/>  <!-- 启用缓存 -->
+        <property name="authenticationCachingEnabled" value="true"/>    <!-- 启用认证缓存 -->
+        <property name="authenticationCacheName" value="authenticationCache"/> <!-- 设置认证缓存管理器名称 -->
+        <property name="authorizationCachingEnabled" value="true"/>    <!-- 启用授权缓存 -->
+        <property name="authorizationCacheName" value="authorizationCache"/> <!-- 设置授权缓存管理器名称 -->
+        <property name="cacheManager" ref="cacheManager"/> <!-- 设置缓存管理器 -->
         <property name="credentialsMatcher">
-            <bean class="com.yootk.ssm.realm.matcher.DefaultCredentialsMatcher"/>
+            <bean class="com.yootk.ssm.realm.matcher.DefaultCredentialsMatcher">
+                <property name="cacheManager" ref="cacheManager"/>
+                <property name="max" value="${login.password.retry.max}"/>
+                <property name="expire" value="${login.password.retry.lock.time}"/>
+            </bean>
         </property>
     </bean>
     <!-- 2、整个的Shiro里面最为重要的就是SecurityManager，这个类之中需要追加realm配置 -->
@@ -31,9 +41,14 @@
         <!-- 在登录注销实现之后，将跳转到CommonAction中配置的“/logoutInfo.action”路径 -->
         <property name="redirectUrl" value="/logoutInfo.action"/>
     </bean>
-    <!-- 4、配置要使用的EHCache缓存组件 -->
-    <bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
-        <property name="cacheManagerConfigFile" value="classpath:shiro/ehcache.xml"/>
+
+    <bean id="kickoutFilter" class="com.yootk.ssm.filter.authc.KickoutSessionControlFilter">
+        <property name="sessionManager" ref="sessionManager"/>
+        <property name="kickoutCacheName" value="kickoutCache"/>
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="kickoutUrl" value="/kickout.jsp"/>
+        <property name="max" value="${concurrent.online.session.kickout.max}"/>
+        <property name="kickoutAttributeName" value="kickout"/>
     </bean>
 
     <!-- 5、定义Shiro可以使用的session生成管理器，通过此操作进行Shiro-session管理 -->
@@ -44,6 +59,8 @@
           class="org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO">
         <property name="sessionIdGenerator" ref="sessionIdGenerator"/>
         <property name="cacheManager" ref="cacheManager"/>
+        <!-- 针对于Session数据的存储操作，定义有一个专属的缓存名称 -->
+        <property name="activeSessionsCacheName" value="shiro-activeSessionCache"/>
     </bean>
     <!-- 7、定义Cookie的存储配置 -->
     <bean id="sessionIdCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
@@ -85,13 +102,14 @@
                 <!-- authc描述的执行处理路径，此时相当于替换了原始的authc功能 -->
                 <entry key="authc" value-ref="formAuthenticationFilter"/>
                 <entry key="logout" value-ref="logoutFilter"/>
+                <entry key="kickout" value-ref="kickoutFilter"/>
             </map>
         </property>
         <property name="filterChainDefinitions"><!-- 检测路径 -->
             <value>
                 /logout.shiro=logout
                 /login.action=authc
-                /pages/**=user
+                /pages/**=user,kickout
             </value>
         </property>
     </bean>

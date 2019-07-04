@@ -1,4 +1,4 @@
-package com.yootk.ssm.authc.exception;
+package com.yootk.ssm.filter.authc.exception;
 
 import org.apache.shiro.authc.AuthenticationException;
 

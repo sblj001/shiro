@@ -25,9 +25,9 @@ CREATE TABLE member_role(
 	rid				varchar(50)
 ) engine='innodb' ;
 -- 0表示活跃、1表示锁定
-INSERT INTO member(mid,name,password,locked) VALUES ('admin','管理员','hello',0) ;
-INSERT INTO member(mid,name,password,locked) VALUES ('lee','普通人','hello',0) ;
-INSERT INTO member(mid,name,password,locked) VALUES ('mermaid','美人鱼','hello',1) ;
+INSERT INTO member(mid,name,password,locked) VALUES ('admin','管理员','B1195D752E87643B4E54CD079A61E1AE',0) ;
+INSERT INTO member(mid,name,password,locked) VALUES ('lee','普通人','B1195D752E87643B4E54CD079A61E1AE',0) ;
+INSERT INTO member(mid,name,password,locked) VALUES ('mermaid','美人鱼','B1195D752E87643B4E54CD079A61E1AE',1) ;
 -- 定义角色信息
 INSERT INTO role(rid,title) VALUES ('member','用户管理') ;
 INSERT INTO role(rid,title) VALUES ('dept','部门管理') ;

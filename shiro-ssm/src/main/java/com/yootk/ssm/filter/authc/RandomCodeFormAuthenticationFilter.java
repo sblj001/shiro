@@ -1,4 +1,4 @@
-package com.yootk.ssm.authc;
+package com.yootk.ssm.filter.authc;
 
 import com.yootk.ssm.filter.authc.exception.RandomCodeException;
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
